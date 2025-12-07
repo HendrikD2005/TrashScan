@@ -3,6 +3,7 @@
   <v-dialog v-model="showPermissionDialog" max-width="500" persistent>
     <v-card>
       <v-card-title class="text-h6">
+        <FontAwesomeIcon :icon="faCircleInfo" style="color: #0482ff;" />
         Kamerazugriff erforderlich
       </v-card-title>
       <v-card-text>
@@ -15,11 +16,14 @@
           text
           variant="flat"
           @click="denyCamera"
+          @mouseenter="$event.target.style.backgroundColor = 'rgb(255,0,0)'"
+          @mouseleave="$event.target.style.backgroundColor = '#e41801'"
         >
           Abbrechen
         </v-btn>
         <v-btn
           color="#00c853"
+          text
           variant="flat"
           @click="requestCamera"
         >
@@ -72,31 +76,40 @@
 
     <!-- Scan Button -->
     <SimpleButton
-      icon="mdi-camera"
       text="Müll scannen"
       variant="primary"
+
       @click="toggleScanning"
     />
 
     <!-- Tips Accordion -->
-    <v-expansion-panels class="mt-6" max-width="400" width="100%">
-      <v-expansion-panel>
-        <v-expansion-panel-title>
-          Tipps für bessere Erkennung
-        </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <ul>
-            <li>Gute Beleuchtung verwenden</li>
-            <li>Objekt vollständig im Bild</li>
-            <li>Kamera ruhig halten</li>
-          </ul>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+    <v-container class="d-flex align-center justify-center">
+      <v-col cols="7">
+        <v-expansion-panels class="mt-6" max-width="400" width="100%">
+          <v-expansion-panel>
+            <v-expansion-panel-title>
+              Tipps für bessere Erkennung
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <ul>
+                <li>Sorgen Sie für gute Beleuchtung</li>
+                <li>Halten Sie das Objekt mittig ins Bild</li>
+                <li>Fokussieren Sie auf das Objekt</li>
+                <li>Halten Sie das Gerät und da Objekt ruhig</li>
+                <li>Achten Sie auf einen sauberen Hintergrund</li>
+              </ul>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-col>
+    </v-container>
+
   </v-container>
 </template>
 
 <script setup lang="ts">
+  import { faCircleInfo } from '@fortawesome/free-solid-svg-icons'
+  import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { onMounted, ref } from 'vue'
   import SimpleButton from './shared/SimpleButton.vue'
 
@@ -146,3 +159,9 @@
     isScanning.value = !isScanning.value
   }
 </script>
+
+<style scoped>
+.hover-white:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+</style>
