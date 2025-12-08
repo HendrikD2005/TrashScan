@@ -1,22 +1,28 @@
 <template>
   <v-app-bar color="#00c853" prominent>
-    <template v-slot:prepend>
-      <v-icon size="32">mdi-delete</v-icon>
-    </template>
 
-    <v-app-bar-title class="text-h5 font-weight-bold">
-      TrashScan
-    </v-app-bar-title>
+    <v-container fluid>
+      <v-row>
+        <v-col class="app-bar-title" cols="12" offset="3" sm="6">
+          <v-app-bar-title class="text-h5 font-weight-bold">
+            <FontAwesomeIcon :icon="faTrashCan" style="color: #fbfbfb;" />
+            TrashScan
+          </v-app-bar-title>
+        </v-col>
+      </v-row>
+    </v-container>
 
-    <template v-slot:append>
-      <SimpleButton icon="mdi-camera" text="Scan" @click="$emit('navigate', 'scan')" />
-      <SimpleButton icon="mdi-map-marker" text="Map" @click="$emit('navigate', 'map')" />
-      <SimpleButton icon="mdi-head-question" text="Quiz" @click="$emit('navigate', 'quiz')" />
+    <template #append>
+      <SimpleButton text="Scan" @click="$emit('navigate', 'scan')" />
+      <SimpleButton text="Map" @click="$emit('navigate', 'map')" />
+      <SimpleButton text="Quiz" @click="$emit('navigate', 'quiz')" />
     </template>
   </v-app-bar>
 </template>
 
 <script setup lang="ts">
+  import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
+  import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import SimpleButton from '../shared/SimpleButton.vue'
 
   defineEmits<{
@@ -28,4 +34,5 @@
 .v-app-bar {
   color: white !important;
 }
+
 </style>

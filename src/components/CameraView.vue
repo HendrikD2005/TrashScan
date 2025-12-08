@@ -3,6 +3,7 @@
   <v-dialog v-model="showPermissionDialog" max-width="500" persistent>
     <v-card>
       <v-card-title class="text-h6">
+        <FontAwesomeIcon :icon="faCircleInfo" style="color: #0482ff;" />
         Kamerazugriff erforderlich
       </v-card-title>
       <v-card-text>
@@ -15,11 +16,14 @@
           text
           variant="flat"
           @click="denyCamera"
+          @mouseenter="$event.target.style.backgroundColor = 'rgb(255,0,0)'"
+          @mouseleave="$event.target.style.backgroundColor = '#e41801'"
         >
           Abbrechen
         </v-btn>
         <v-btn
           color="#00c853"
+          text
           variant="flat"
           @click="requestCamera"
         >
@@ -47,77 +51,96 @@
       <span style="color: #387301">Müllerkennungsmodell bereit</span>
     </v-alert>
 
-    <!-- Camera Placeholder -->
+    <!-- Camera View -->
     <v-card
       class="d-flex align-center justify-center mb-6"
       color="black"
       height="300"
       width="400"
     >
+      <video
+        v-if="cameraGranted"
+        ref="videoElement"
+        autoplay
+        playsinline
+        style="width: 100%; height: 100%; object-fit: cover;"
+      />
       <v-icon
-        v-if="!isScanning"
+        v-else
         color="grey-darken-1"
         size="64"
       >
         mdi-camera
       </v-icon>
-      <div
-        v-else
-        class="text-h6"
-        style="color: #00c853"
-      >
-        Scanning...
-      </div>
     </v-card>
 
     <!-- Scan Button -->
     <SimpleButton
-      icon="mdi-camera"
       text="Müll scannen"
       variant="primary"
       @click="toggleScanning"
     />
 
     <!-- Tips Accordion -->
-    <v-expansion-panels class="mt-6" max-width="400" width="100%">
-      <v-expansion-panel>
-        <v-expansion-panel-title>
-          Tipps für bessere Erkennung
-        </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <ul>
-            <li>Gute Beleuchtung verwenden</li>
-            <li>Objekt vollständig im Bild</li>
-            <li>Kamera ruhig halten</li>
-          </ul>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+    <v-container class="d-flex align-center justify-center">
+      <v-col cols="7">
+        <v-expansion-panels class="mt-6" max-width="400" width="100%">
+          <v-expansion-panel>
+            <v-expansion-panel-title>
+              Tipps für bessere Erkennung
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <ul>
+                <li>Sorgen Sie für gute Beleuchtung</li>
+                <li>Halten Sie das Objekt mittig ins Bild</li>
+                <li>Fokussieren Sie auf das Objekt</li>
+                <li>Halten Sie das Gerät und da Objekt ruhig</li>
+                <li>Achten Sie auf einen sauberen Hintergrund</li>
+              </ul>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-col>
+    </v-container>
+
   </v-container>
 </template>
 
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue'
+  import { faCircleInfo } from '@fortawesome/free-solid-svg-icons'
+  import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+  import { nextTick, onMounted, onUnmounted, ref } from 'vue'
   import SimpleButton from './shared/SimpleButton.vue'
 
   const modelReady = ref(true)
   const isScanning = ref(false)
   const showPermissionDialog = ref(false)
   const cameraGranted = ref(false)
+  const videoElement = ref<HTMLVideoElement | null>(null)
+  let currentStream: MediaStream | null = null
 
   onMounted(() => {
-    // Dialog beim Laden der Komponente anzeigen
     showPermissionDialog.value = true
+  })
+
+  onUnmounted(() => {
+    stopCamera()
   })
 
   async function requestCamera () {
     showPermissionDialog.value = false
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true })
-      // Kamera erfolgreich, Stream wieder stoppen
-      for (const track of stream.getTracks()) track.stop()
+      currentStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+      })
       cameraGranted.value = true
-      showPermissionDialog.value = false
+
+      // Warte bis DOM aktualisiert ist
+      await nextTick()
+
+      if (videoElement.value) {
+        videoElement.value.srcObject = currentStream
+      }
     } catch (error: any) {
       console.error('Kamerazugriff-Fehler:', error)
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
@@ -138,11 +161,28 @@
     alert('Ohne Kamerazugriff kann TrashScan nicht funktionieren')
   }
 
-  function toggleScanning () {
+  function stopCamera () {
+    if (currentStream) {
+      for (const track of currentStream.getTracks()) track.stop()
+      currentStream = null
+    }
+    if (videoElement.value) {
+      videoElement.value.srcObject = null
+    }
+  }
+
+  async function toggleScanning () {
     if (!cameraGranted.value) {
       showPermissionDialog.value = true
       return
     }
+
     isScanning.value = !isScanning.value
   }
 </script>
+
+<style scoped>
+.hover-white:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+</style>
