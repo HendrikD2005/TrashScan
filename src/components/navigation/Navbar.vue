@@ -18,7 +18,6 @@
 <script setup lang="ts">
   import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import SimpleButton from '../shared/SimpleButton.vue'
 
   defineEmits<{
     navigate: [page: string]
