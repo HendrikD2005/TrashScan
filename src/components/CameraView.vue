@@ -16,8 +16,8 @@
           text
           variant="flat"
           @click="denyCamera"
-          @mouseenter="$event.target.style.backgroundColor = 'rgb(255,0,0)'"
-          @mouseleave="$event.target.style.backgroundColor = '#e41801'"
+          @mouseenter="($event.target as HTMLElement).style.backgroundColor = 'rgb(255,0,0)'"
+          @mouseleave="($event.target as HTMLElement).style.backgroundColor = '#e41801'"
         >
           Abbrechen
         </v-btn>
@@ -34,7 +34,41 @@
   </v-dialog>
 
   <v-container class="d-flex flex-column align-center py-8">
-    <!-- Model Status Banner -->
+    <!-- Model Loading Banner -->
+    <v-alert
+      v-if="isLoadingModel"
+      class="mb-6"
+      color="#ffa726"
+      max-width="400"
+      rounded
+      type="info"
+      variant="elevated"
+      width="100%"
+    >
+      <template #prepend>
+        <v-progress-circular indeterminate size="20" />
+      </template>
+      <span style="color: #e65100">Lade KI-Modell...</span>
+    </v-alert>
+
+    <!-- Model Error Banner -->
+    <v-alert
+      v-if="modelError"
+      class="mb-6"
+      color="#ef5350"
+      max-width="400"
+      rounded
+      type="error"
+      variant="elevated"
+      width="100%"
+    >
+      <template #prepend>
+        <v-icon color="error">mdi-alert-circle</v-icon>
+      </template>
+      <span style="color: #b71c1c">{{ modelError }}</span>
+    </v-alert>
+
+    <!-- Model Ready Banner -->
     <v-alert
       v-if="modelReady"
       class="mb-6"
@@ -78,6 +112,7 @@
     <SimpleButton
       text="Müll scannen"
       variant="primary"
+      :disabled="!modelReady"
       @click="toggleScanning"
     />
 
@@ -94,7 +129,7 @@
                 <li>Sorgen Sie für gute Beleuchtung</li>
                 <li>Halten Sie das Objekt mittig ins Bild</li>
                 <li>Fokussieren Sie auf das Objekt</li>
-                <li>Halten Sie das Gerät und da Objekt ruhig</li>
+                <li>Halten Sie das Gerät und das Objekt ruhig</li>
                 <li>Achten Sie auf einen sauberen Hintergrund</li>
               </ul>
             </v-expansion-panel-text>
@@ -102,85 +137,118 @@
         </v-expansion-panels>
       </v-col>
     </v-container>
-
   </v-container>
 </template>
 
 <script setup lang="ts">
-  import { faCircleInfo } from '@fortawesome/free-solid-svg-icons'
-  import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { nextTick, onMounted, onUnmounted, ref } from 'vue'
-  import SimpleButton from './shared/SimpleButton.vue'
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import SimpleButton from './shared/SimpleButton.vue'
+import { AIDetection } from '../services/AIDetectionService'
 
-  const modelReady = ref(true)
-  const isScanning = ref(false)
-  const showPermissionDialog = ref(false)
-  const cameraGranted = ref(false)
-  const videoElement = ref<HTMLVideoElement | null>(null)
-  let currentStream: MediaStream | null = null
+const aiService = new AIDetection()
 
-  onMounted(() => {
-    showPermissionDialog.value = true
-  })
+const modelReady = ref(false)
+const isLoadingModel = ref(false)
+const modelError = ref<string | null>(null)
+const isScanning = ref(false)
+const showPermissionDialog = ref(false)
+const cameraGranted = ref(false)
+const videoElement = ref<HTMLVideoElement | null>(null)
+let currentStream: MediaStream | null = null
 
-  onUnmounted(() => {
-    stopCamera()
-  })
+onMounted(async () => {
+  showPermissionDialog.value = true
+  await loadModel()
+})
 
-  async function requestCamera () {
-    showPermissionDialog.value = false
-    try {
-      currentStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      })
-      cameraGranted.value = true
+onUnmounted(() => {
+  stopCamera()
+})
 
-      // Warte bis DOM aktualisiert ist
-      await nextTick()
-
-      if (videoElement.value) {
-        videoElement.value.srcObject = currentStream
-      }
-    } catch (error: any) {
-      console.error('Kamerazugriff-Fehler:', error)
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        alert('Kamerazugriff wurde verweigert')
-      } else {
-        if (error.message.startsWith('Device in use')) {
-          alert('Fehler beim Kamerazugriff: Das Gerät wird gerade von einer anderen Anwendung genutzt.\n'
-            + 'Beenden Sie die andere Anwendung und versuchen Sie es erneut. ')
-        } else {
-          alert('Fehler beim Kamerazugriff: ' + error.message)
-        }
-      }
-    }
+async function loadModel () {
+  isLoadingModel.value = true
+  modelError.value = null
+  try {
+    await aiService.initializeModel()
+    modelReady.value = aiService.isReady()
+  } catch (error) {
+    modelError.value = error instanceof Error ? error.message : 'Unbekannter Fehler'
+    console.error('Model initialization failed:', error)
+  } finally {
+    isLoadingModel.value = false
   }
+}
 
-  function denyCamera () {
-    showPermissionDialog.value = false
-    alert('Ohne Kamerazugriff kann TrashScan nicht funktionieren')
-  }
+async function requestCamera () {
+  showPermissionDialog.value = false
+  try {
+    currentStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' },
+    })
+    cameraGranted.value = true
 
-  function stopCamera () {
-    if (currentStream) {
-      for (const track of currentStream.getTracks()) track.stop()
-      currentStream = null
-    }
+    await nextTick()
+
     if (videoElement.value) {
-      videoElement.value.srcObject = null
+      videoElement.value.srcObject = currentStream
+    }
+  } catch (error: any) {
+    console.error('Kamerazugriff-Fehler:', error)
+    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+      alert('Kamerazugriff wurde verweigert')
+    } else {
+      if (error.message.startsWith('Device in use')) {
+        alert('Fehler beim Kamerazugriff: Das Gerät wird gerade von einer anderen Anwendung genutzt.\n'
+          + 'Beenden Sie die andere Anwendung und versuchen Sie es erneut.')
+      } else {
+        alert('Fehler beim Kamerazugriff: ' + error.message)
+      }
     }
   }
+}
 
-  async function toggleScanning () {
-    if (!cameraGranted.value) {
-      showPermissionDialog.value = true
-      return
-    }
+function denyCamera () {
+  showPermissionDialog.value = false
+  alert('Ohne Kamerazugriff kann TrashScan nicht funktionieren')
+}
 
-    isScanning.value = !isScanning.value
+function stopCamera () {
+  if (currentStream) {
+    for (const track of currentStream.getTracks()) track.stop()
+    currentStream = null
   }
+  if (videoElement.value) {
+    videoElement.value.srcObject = null
+  }
+}
+
+async function toggleScanning () {
+  if (!cameraGranted.value) {
+    showPermissionDialog.value = true
+    return
+  }
+
+  if (!modelReady.value) {
+    alert('Das KI-Modell ist noch nicht bereit')
+    return
+  }
+
+  isScanning.value = !isScanning.value
+
+  if (isScanning.value && videoElement.value) {
+    try {
+      const prediction = await aiService.getBestPrediction(videoElement.value)
+      console.log('Prediction:', prediction)
+    } catch (error) {
+      console.error('Prediction error:', error)
+      alert('Fehler bei der Vorhersage')
+    }
+  }
+}
 </script>
-
+3
 <style scoped>
 .hover-white:hover {
   background-color: rgba(255, 255, 255, 0.1) !important;
