@@ -212,7 +212,7 @@ export class AIDetection {
 
     const testPaths = [
       './assets/my_model/model.json',
-      '/assets/my_model/model.json',
+      'assets/my_model/model.json',
       'assets/my_model/model.json',
     ]
 
