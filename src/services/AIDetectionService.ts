@@ -1,5 +1,3 @@
-import { ref } from 'vue'
-
 declare global {
   interface Window {
     tmImage: any
@@ -13,7 +11,7 @@ export interface PredictionResult {
   confidence: number
 }
 
-export class AIDetection {
+export class AIDetectionService {
   private model: any = null
   private maxPredictions = 0
   private isModelLoaded = false
@@ -212,7 +210,7 @@ export class AIDetection {
 
     const testPaths = [
       './assets/my_model/model.json',
-      'assets/my_model/model.json',
+      '/assets/my_model/model.json',
       'assets/my_model/model.json',
     ]
 
@@ -224,51 +222,5 @@ export class AIDetection {
         console.log(`${path}: ✗ Error`)
       }
     }
-  }
-}
-
-// Singleton Instance
-const aiDetectionInstance = new AIDetection()
-
-// Composable
-export function useAIDetection () {
-  const modelReady = ref(false)
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
-
-  const initializeModel = async () => {
-    isLoading.value = true
-    error.value = null
-    try {
-      await aiDetectionInstance.initializeModel()
-      modelReady.value = aiDetectionInstance.isReady()
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Unknown error'
-      console.error('Model initialization failed:', err)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  const predictImage = async (element: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement) => {
-    return await aiDetectionInstance.predictImage(element)
-  }
-
-  const getBestPrediction = async (element: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement) => {
-    return await aiDetectionInstance.getBestPrediction(element)
-  }
-
-  const getModelInfo = () => {
-    return aiDetectionInstance.getModelInfo()
-  }
-
-  return {
-    modelReady,
-    isLoading,
-    error,
-    initializeModel,
-    predictImage,
-    getBestPrediction,
-    getModelInfo,
   }
 }
