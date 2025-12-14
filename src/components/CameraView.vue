@@ -86,30 +86,38 @@
     </v-alert>
 
     <!-- Camera View -->
-    <v-card
-      class="d-flex align-center justify-center mb-6"
-      color="black"
-      height="300"
-      width="400"
-    >
-      <video
-        v-if="cameraGranted"
-        ref="videoElement"
-        autoplay
-        playsinline
-        style="width: 100%; height: 100%; object-fit: cover;"
-      />
-      <v-icon
-        v-else
-        color="grey-darken-1"
-        size="64"
-      >
-        mdi-camera
-      </v-icon>
-    </v-card>
+    <v-container>
+      <v-row justify="center">
+        <v-col cols="12" md="8" lg="6" xl="4" class="mb-6 d-flex justify-center">
+          <v-card
+            class="d-flex align-center justify-center mb-6"
+            color="black"
+            height="300"
+            width="400"
+          >
+            <video
+              v-if="cameraGranted"
+              ref="videoElement"
+              autoplay
+              playsinline
+              style="width: 100%; height: 100%; object-fit: cover;"
 
-    <!-- Hidden Canvas for Processing -->
-    <canvas ref="canvasElement" style="display: none;" />
+            />
+            <v-icon
+              v-else
+              color="grey-darken-1"
+              size="64"
+            >
+              mdi-camera
+            </v-icon>
+          </v-card>
+
+          <!-- Hidden Canvas for Processing -->
+          <canvas ref="canvasElement" style="display: none;" />
+        </v-col>
+      </v-row>
+    </v-container>
+
 
     <!-- Scan Button -->
     <SimpleButton
