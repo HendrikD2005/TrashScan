@@ -7,7 +7,6 @@
         </h1>
       </v-col>
     </v-row>
-
     <CameraView />
   </v-container>
 </template>

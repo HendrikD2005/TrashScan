@@ -12,18 +12,12 @@
       </v-row>
     </v-container>
 
-    <template #append>
-      <SimpleButton text="Scan" @click="$emit('navigate', 'scan')" />
-      <SimpleButton text="Map" @click="$emit('navigate', 'map')" />
-      <SimpleButton text="Quiz" @click="$emit('navigate', 'quiz')" />
-    </template>
   </v-app-bar>
 </template>
 
 <script setup lang="ts">
   import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import SimpleButton from '../shared/SimpleButton.vue'
 
   defineEmits<{
     navigate: [page: string]
