@@ -12,12 +12,36 @@
       </v-row>
     </v-container>
 
+    <v-container fluid>
+      <v-row justify="end" align="center">
+        <v-col cols="auto" class="d-flex align-center ga-2">
+          <FontAwesomeIcon :icon="faSun" style="color: #ffffff;" />
+          <v-switch
+            v-model="isDarkMode"
+            hide-details
+            inset
+            @change="toggleTheme"
+          ></v-switch>
+          <FontAwesomeIcon :icon="faMoon" style="color: #ffffff;" />
+        </v-col>
+      </v-row>
+    </v-container>
+
   </v-app-bar>
 </template>
 
 <script setup lang="ts">
-  import { faTrashCan } from '@fortawesome/free-solid-svg-icons'
+  import { ref } from 'vue';
+  import {useTheme} from "vuetify/framework";
+  import {faTrashCan, faSun, faMoon } from '@fortawesome/free-solid-svg-icons'
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+  const theme = useTheme()
+  const isDarkMode = ref(theme.global.current.value.dark)
+
+  const toggleTheme = () => {
+    theme.toggle()
+  }
 
   defineEmits<{
     navigate: [page: string]

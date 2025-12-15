@@ -157,15 +157,15 @@
         <!-- Recycling Tip -->
         <v-alert
           v-if="recyclingTip"
-          color="#e8f5e9"
+          :color="isDarkMode ? '#1e1e1e' : '#e8f5e9'"
           class="mb-4"
           variant="tonal"
         >
           <template #prepend>
             <span class="text-h6">💡</span>
           </template>
-          <div class="text-subtitle-2 font-weight-bold mb-1">Entsorgungstipp:</div>
-          <div>{{ recyclingTip }}</div>
+          <div class="text-subtitle-2 font-weight-bold mb-1"></div>
+          <div :style="{ color: isDarkMode ? '#ffffff' : '#000000' }">{{ recyclingTip }}</div>
         </v-alert>
 
         <!-- Other Predictions -->
@@ -241,6 +241,12 @@ const predictions = ref<PredictionResult[]>([])
 const bestPrediction = ref<any>(null)
 const recyclingTip = ref('')
 let currentStream: MediaStream | null = null
+
+import { useTheme } from 'vuetify';
+import { computed } from 'vue';
+
+const theme = useTheme();
+const isDarkMode = computed(() => theme.global.current.value.dark);
 
 onMounted(async () => {
   showPermissionDialog.value = true
