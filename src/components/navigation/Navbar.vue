@@ -21,6 +21,7 @@
             hide-details
             inset
             @change="toggleTheme"
+            :color="isDarkMode ? '#1800ff' : '#ffffff'"
           ></v-switch>
           <FontAwesomeIcon :icon="faMoon" style="color: #ffffff;" />
         </v-col>
