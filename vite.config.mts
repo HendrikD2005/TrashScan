@@ -7,6 +7,7 @@ import Vue from '@vitejs/plugin-vue'
 import VueRouter from 'unplugin-vue-router/vite'
 import { VueRouterAutoImports } from 'unplugin-vue-router'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import obfuscator from 'vite-plugin-javascript-obfuscator'
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -57,6 +58,15 @@ export default defineConfig({
         ],
       },
     }),
+    obfuscator({
+      include: ['src/**/*.js', 'src/**/*.vue', 'src/**/*.ts'],
+      exclude: ['/node_modules/'],
+      apply: 'build',
+      options: {
+        compact: true,
+        stringArray: true,
+      }
+    })
   ],
   optimizeDeps: {
     exclude: [

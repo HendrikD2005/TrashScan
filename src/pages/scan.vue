@@ -2,7 +2,7 @@
   <v-container>
     <v-row justify="center">
       <v-col class="text-center" cols="12">
-        <h1 class="text-h4 mb-5 mt-4" style="color: #387301">
+        <h1 class="text-h4 mb-5 mt-4" :style="{ color: isDarkMode ? '#51da58' : '#387301'}">
           <strong>TrashScan - Müll erkennen & richtig entsorgen</strong>
         </h1>
       </v-col>
@@ -13,4 +13,9 @@
 
 <script setup lang="ts">
   import CameraView from '../components/CameraView.vue'
+  import { useTheme } from 'vuetify';
+  import { computed } from 'vue';
+
+  const theme = useTheme();
+  const isDarkMode = computed(() => theme.global.current.value.dark);
 </script>
