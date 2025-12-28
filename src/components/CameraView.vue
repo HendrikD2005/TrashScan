@@ -168,6 +168,23 @@
           <div :style="{ color: isDarkMode ? '#ffffff' : '#000000' }">{{ recyclingTip }}</div>
         </v-alert>
 
+        <v-alert
+          :color="isDarkMode ? '#1e1e1e' : '#e8f5e9'"
+          class="mb-4"
+          variant="tonal"
+        >
+          <div class="d-flex align-center">
+            <FontAwesomeIcon
+              :icon="faCircleInfo"
+              class="mr-3"
+              :style="{ color: isDarkMode ? '#ffffff' : '#0029ff' }">
+            </FontAwesomeIcon>
+            <span :style="{ color: isDarkMode ? '#ffffff' : '#000000' }">
+      TrashScan kann Fehler machen.
+    </span>
+          </div>
+        </v-alert>
+
         <!-- Other Predictions -->
         <div v-if="predictions.length > 1">
           <div class="text-subtitle-2 font-weight-bold mb-2">Weitere mögliche Erkennungen:</div>
@@ -193,6 +210,7 @@
             </v-list-item>
           </v-list>
         </div>
+
       </v-card-text>
     </v-card>
 
