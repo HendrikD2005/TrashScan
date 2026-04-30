@@ -14,6 +14,7 @@ declare module 'vue' {
     CameraView: typeof import('./components/CameraView.vue')['default']
     Footbar: typeof import('./components/navigation/Footbar.vue')['default']
     Navbar: typeof import('./components/navigation/Navbar.vue')['default']
+    ReadmeDialog: typeof import('./components/ReadmeDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SimpleButton: typeof import('./components/shared/SimpleButton.vue')['default']

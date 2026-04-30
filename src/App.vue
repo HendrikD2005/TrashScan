@@ -1,5 +1,6 @@
 <template>
   <v-app>
+    <ReadmeDialog />
     <Navbar />
     <v-main>
       <router-view />
@@ -11,4 +12,5 @@
 <script lang="ts" setup>
   import Footbar from '@/components/navigation/Footbar.vue'
   import Navbar from '@/components/navigation/Navbar.vue'
+  import ReadmeDialog from '@/components/ReadmeDialog.vue'
 </script>
